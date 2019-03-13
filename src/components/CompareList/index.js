@@ -1,9 +1,10 @@
+/* eslint-disable react/button-has-type */
 import React from 'react';
 import PropTypes from 'prop-types';
 
 import { Container, Repository } from './styles';
 
-const CompareList = ({ repositories }) => (
+const CompareList = ({ repositories, onDelete, onUpdate }) => (
   <Container>
     {repositories.map(repository => (
       <Repository key={repository.id}>
@@ -35,12 +36,20 @@ const CompareList = ({ repositories }) => (
             <small> last commit</small>
           </li>
         </ul>
+        <button name="update" onClick={() => onUpdate(repository.full_name)}>
+          update
+        </button>
+        <button name="delete" onClick={() => onDelete(repository.id)}>
+          delete
+        </button>
       </Repository>
     ))}
   </Container>
 );
 
 CompareList.propTypes = {
+  onUpdate: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
   repositories: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number,

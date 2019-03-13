@@ -57,4 +57,22 @@ export const Repository = styled.div`
       }
     }
   }
+
+  button[name='update'] {
+    height: 30px;
+    width: 100%;
+    border: none;
+    color: #fff;
+    background: #4277f4;
+    text-transform: uppercase;
+  }
+
+  button[name='delete'] {
+    height: 30px;
+    width: 100%;
+    border: none;
+    color: #fff;
+    background: #f44242;
+    text-transform: uppercase;
+  }
 `;

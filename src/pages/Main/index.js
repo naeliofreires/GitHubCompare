@@ -15,6 +15,14 @@ export default class Main extends Component {
     repositoryError: false,
   };
 
+  componentDidMount() {
+    const reps = localStorage.getItem('repositories');
+    if (reps) {
+      const repositories = JSON.parse(reps);
+      this.setState({ repositories });
+    }
+  }
+
   handleAddRepository = async (e) => {
     e.preventDefault();
 
@@ -25,11 +33,16 @@ export default class Main extends Component {
 
       repository.lastCommit = moment(repository.pushed_at).fromNow();
 
-      this.setState({
-        repositoryInput: '',
-        repositoryError: false,
-        repositories: [...repositories, repository],
-      });
+      this.setState(
+        {
+          repositoryInput: '',
+          repositoryError: false,
+          repositories: [...repositories, repository],
+        },
+        () => {
+          localStorage.setItem('repositories', JSON.stringify([...repositories, repository]));
+        },
+      );
     } catch (error) {
       this.setState({
         repositoryError: true,
@@ -37,6 +50,31 @@ export default class Main extends Component {
     } finally {
       this.setState({ loading: false });
     }
+  };
+
+  onUpdate = async (fullName) => {
+    const { data: repository } = await api.get(`/repos/${fullName}`);
+
+    const { repositories } = this.state;
+
+    const updateRepositories = repositories.map((rep) => {
+      if (rep.id === repository.id) {
+        return { id: rep.id0, lastCommit: moment(repository.pushed_at).fromNow(), ...repository };
+      }
+      return rep;
+    });
+
+    this.setState({ repositories: updateRepositories });
+    localStorage.setItem('repositories', JSON.stringify([...updateRepositories]));
+  };
+
+  onDelete = (id) => {
+    const reps = localStorage.getItem('repositories');
+
+    const repositories = JSON.parse(reps).filter(obj => id !== obj.id);
+
+    this.setState({ repositories });
+    localStorage.setItem('repositories', JSON.stringify([...repositories]));
   };
 
   render() {
@@ -57,7 +95,11 @@ export default class Main extends Component {
           <button type="submit">{loading ? <i className="fa fa-spinner fa-pulse" /> : 'OK'}</button>
         </Form>
 
-        <CompareList repositories={repositories} />
+        <CompareList
+          onUpdate={fullName => this.onUpdate(fullName)}
+          onDelete={id => this.onDelete(id)}
+          repositories={repositories}
+        />
       </Container>
     );
   }
